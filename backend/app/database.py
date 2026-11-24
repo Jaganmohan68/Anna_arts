@@ -1,7 +1,24 @@
 import os
+from importlib import import_module
+from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
+try:
+    load_dotenv = import_module("dotenv").load_dotenv
+except ModuleNotFoundError:
+    def load_dotenv():
+        env_file = Path(".env")
+        if not env_file.is_file():
+            return
+        for line in env_file.read_text().splitlines():
+            key, separator, value = line.partition("=")
+            if separator and key.strip() and not key.lstrip().startswith("#"):
+                os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+load_dotenv()
 
 
 class Base(DeclarativeBase):
